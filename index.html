@@ -1,0 +1,128 @@
+<!doctype html>
+
+<html>
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta content="Looks like a V8 bug that cause Node.js(and also V8-related browsers) memory leak"
+        name="description" />
+    <meta content="V8 leak test" name="keywords" />
+
+    <title>V8-leak-test</title>
+
+    <style>
+        pre {
+            border: 1px solid gray;
+        }
+
+        .Test {
+            margin-right: 50px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Click the "Run Test" button to run the following code</h2>
+    <h2>You can open DevTools to see the memory leak</h2>
+    <div>
+        <button id='Run-Test' class='Test'>Run Test</button><button id='Stop-Test' class='Test'>Stop Test</button>
+    </div>
+    <pre>
+    <code>
+        let create_leak_class = () =&gt; {
+
+            function Leak() {
+        
+                //call an unused prototype method
+                this.unused();
+        
+            }
+        
+            Leak.prototype.unused = () =&gt; {
+        
+                //do nothing
+            };
+        
+            return Leak;
+        
+        }
+        
+        let loadTest = () =&gt; {
+        
+            let Leak = create_leak_class();
+            let test = new Leak();
+        };
+        
+        while (true) {
+        
+            loadTest();
+        
+        }  
+    </code>
+</pre>
+
+    <script>
+        let create_leak_class = () => {
+
+            function Leak() {
+
+                //call an unused prototype method
+                this.unused();
+
+            }
+
+            Leak.prototype.unused = () => {
+
+                //do nothing
+            };
+
+            return Leak;
+
+        }
+
+        let loadTest = () => {
+
+            let Leak = create_leak_class();
+            let test = new Leak();
+        };
+
+        let runTest = null;
+
+
+    </script>
+
+    <script>
+        var runTestEl = document.getElementById('Run-Test');
+        var stopTestEl = document.getElementById('Stop-Test');
+
+        runTestEl.addEventListener("click", function () {
+            if (!runTest) {
+                window.alert("the Test will begin...");
+                runTest = setInterval(function () {
+                    let count = 0;
+                    while (++count < 1e5) loadTest();
+                }, 1000);
+            } else {
+                window.alert("There are already an Test running!")
+            }
+        });
+
+        stopTestEl.addEventListener("click", function () {
+            if (runTest) {
+                clearInterval(runTest);
+                runTest = null;
+                window.alert("the Test has stoped.")
+            } else {
+                window.alert("There are not any Test to stop!")
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
